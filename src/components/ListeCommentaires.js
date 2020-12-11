@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react';
 import { Button, FormGroup, Input, Label } from 'reactstrap';
 import { connect } from 'react-redux';
@@ -92,6 +93,7 @@ class ListeCommentaires extends Component {
         } else {
             idCommentaireParent = id_commentaire_parent
         }
+       
         this.setState({
             idCommentaireParent: idCommentaireParent,
             showMe: id_commentaire,

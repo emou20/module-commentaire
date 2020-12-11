@@ -93,3 +93,15 @@
     width: 100%;
     margin: 20px 0px;
 }
+
+.suppBtt {
+background: none;
+border: none;
+}
+
+.validBtt {
+    background: none;
+    border: none;
+    font-size: 21px;
+    color: green;
+}

@@ -13,6 +13,7 @@ class Commentaires extends Component {
         mail: "",
         corp: "",
         idCommentaireParent: 0,
+        destinataire: null
     }
 
 
