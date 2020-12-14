@@ -4,7 +4,11 @@ import { Button, FormGroup, Input, Label } from 'reactstrap';
 import { connect } from 'react-redux';
 import Axios from 'axios';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
-import Commentaires from './Commentaires'
+import Commentaires from './Commentaires';
+import { BiLike } from "react-icons/bi";
+import { AiTwotoneLike } from "react-icons/ai";
+
+
 
 class ListeCommentaires extends Component {
 
@@ -20,7 +24,8 @@ class ListeCommentaires extends Component {
         idCommentaireParent: 0,
         showMe: "",
         hideAll: "hideAll",
-        destinataire: null
+        destinataire: null,
+        nbrLike:3
 
     }
 
@@ -81,8 +86,6 @@ class ListeCommentaires extends Component {
             })
 
 
-
-
     }
 
     repondre(id_commentaire_parent, id_commentaire, nom) {
@@ -100,6 +103,37 @@ class ListeCommentaires extends Component {
             destinataire: nom
         })
     }
+
+    like(id_commentaire, index) {
+
+        
+
+       const tbRecherche = this.state.commentaires;
+       let nbrlikeNv = tbRecherche[index].nbrLike + 1;
+       tbRecherche[index].nbrLike = nbrlikeNv;
+
+       this.setState({
+        commentaires:tbRecherche
+       });
+
+       Axios({
+        method: 'POST',
+        url: 'http://localhost/apiCommentaire/editLikeCommentaire.php',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: {"id_commentaire": id_commentaire, "nbrLike": nbrlikeNv}
+        })
+        .then((response) => {
+            if (response.data) {
+                console.log(response.data)
+            }
+            
+        })
+
+        
+    }
+
 
     handleChange = event => {
 
@@ -143,6 +177,8 @@ class ListeCommentaires extends Component {
     }
 
 
+    
+
     render() {
         console.log(" state ===>", this.state);
         const { nom, objet, mail, corp } = this.state;
@@ -168,6 +204,7 @@ class ListeCommentaires extends Component {
 
                                     </div>
                                 </div>
+                                <button onClick={() => this.like(el.id_commentaire, index)} className="nombreComment">{el.nbrLike} {el.nbrLike === 0 ? <BiLike /> : <AiTwotoneLike /> } </button>
                                 <button onClick={() => this.repondre(el.id_commentaire_parent, el.id_commentaire, el.nom)} className="bttRepondre">Repondre
           </button>
                                 {this.state.showMe === el.id_commentaire ?
