@@ -7,6 +7,7 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import Commentaires from './Commentaires';
 import { BiLike } from "react-icons/bi";
 import { AiTwotoneLike } from "react-icons/ai";
+import { BsPencilSquare } from "react-icons/bs";
 
 
 
@@ -25,7 +26,7 @@ class ListeCommentaires extends Component {
         showMe: "",
         hideAll: "hideAll",
         destinataire: null,
-        nbrLike:3
+        idCommentEdit: ""
 
     }
 
@@ -85,7 +86,6 @@ class ListeCommentaires extends Component {
                 console.log(error)
             })
 
-
     }
 
     repondre(id_commentaire_parent, id_commentaire, nom) {
@@ -96,7 +96,7 @@ class ListeCommentaires extends Component {
         } else {
             idCommentaireParent = id_commentaire_parent
         }
-       
+
         this.setState({
             idCommentaireParent: idCommentaireParent,
             showMe: id_commentaire,
@@ -106,32 +106,64 @@ class ListeCommentaires extends Component {
 
     like(id_commentaire, index) {
 
-        
 
-       const tbRecherche = this.state.commentaires;
-       let nbrlikeNv = tbRecherche[index].nbrLike + 1;
-       tbRecherche[index].nbrLike = nbrlikeNv;
 
-       this.setState({
-        commentaires:tbRecherche
-       });
+        const tbRecherche = this.state.commentaires;
+        let nbrlikeNv = tbRecherche[index].nbrLike + 1;
+        tbRecherche[index].nbrLike = nbrlikeNv;
 
-       Axios({
-        method: 'POST',
-        url: 'http://localhost/apiCommentaire/editLikeCommentaire.php',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        data: {"id_commentaire": id_commentaire, "nbrLike": nbrlikeNv}
+        this.setState({
+            commentaires: tbRecherche
+        });
+
+        Axios({
+            method: 'POST',
+            url: 'http://localhost/apiCommentaire/editLikeCommentaire.php',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: { "id_commentaire": id_commentaire, "nbrLike": nbrlikeNv }
         })
-        .then((response) => {
-            if (response.data) {
-                console.log(response.data)
-            }
-            
-        })
+            .then((response) => {
+                if (response.data) {
+                    console.log(response.data)
+                }
 
-        
+            })
+
+
+    }
+
+    editComment(id_commentaire, index) {
+
+        const monComment = this.state.commentaires[index].corp;
+        this.setState({
+            idCommentEdit: id_commentaire,
+            corp: monComment
+        })
+    }
+    onEnterPress = (e) => {
+        if (e.keyCode === 13 && e.shiftKey === false) {
+            e.preventDefault();
+
+            Axios({
+                method: 'POST',
+                url: 'http://localhost/apiCommentaire/editCorpCommentaire.php',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                data: { "id_commentaire": this.state.idCommentEdit, "nvComment": this.state.corp }
+            })
+                .then((response) => {
+                    if (response.data === "OK") {
+                        this.setState({
+                            idCommentEdit: "",
+                        });
+                        window.location.reload(true);
+                    }
+
+                })
+        }
     }
 
 
@@ -145,9 +177,6 @@ class ListeCommentaires extends Component {
 
     handleSubmitReplay = event => {
         event.preventDefault();
-
-
-
         Axios({
             method: 'POST',
             url: 'http://localhost/apiCommentaire/insertCommentaireParent.php',
@@ -177,7 +206,7 @@ class ListeCommentaires extends Component {
     }
 
 
-    
+
 
     render() {
         console.log(" state ===>", this.state);
@@ -200,13 +229,23 @@ class ListeCommentaires extends Component {
                                     <div className="container-fluid objetComment">{el.objet}</div>
                                     <div className="container-fluid corpComment">
                                         {el.destinataire !== null ? <span>@{el.destinataire} </span> : <span></span>}
-                                        {el.corp}
+
+                                        {this.state.idCommentEdit === el.id_commentaire ?
+                                            <FormGroup>
+                                                <Input type="textarea" name="corp" id="exampleText" value={corp} onKeyDown={this.onEnterPress} onChange={this.handleChange} />
+                                            </FormGroup>
+                                            :
+                                            <div>{el.corp}</div>
+
+                                        }
 
                                     </div>
-                                </div>
-                                <button onClick={() => this.like(el.id_commentaire, index)} className="nombreComment">{el.nbrLike} {el.nbrLike === 0 ? <BiLike /> : <AiTwotoneLike /> } </button>
-                                <button onClick={() => this.repondre(el.id_commentaire_parent, el.id_commentaire, el.nom)} className="bttRepondre">Repondre
+                                    <button onClick={() => this.editComment(el.id_commentaire, index)} className="nombreComment"><BsPencilSquare /> </button>
+                                    <button onClick={() => this.like(el.id_commentaire, index)} className="nombreComment">{el.nbrLike} {el.nbrLike === 0 ? <BiLike /> : <AiTwotoneLike />} </button>
+                                    <button onClick={() => this.repondre(el.id_commentaire_parent, el.id_commentaire, el.nom)} className="bttRepondre">Repondre
           </button>
+                                </div>
+
                                 {this.state.showMe === el.id_commentaire ?
                                     <div className="contFormRepondre" >
                                         <form onSubmit={this.handleSubmitReplay}>
